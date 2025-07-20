@@ -227,7 +227,7 @@ class MassSearchCard extends HTMLElement {
                         } else {
                             title = `${t.popup_title} "${query}" (${mediaType})`;
                         }
-                        this.showPopup(response, title, t);
+                        this.showPopup(response, title, t, mediaType);
                     }
                 } catch (error) {
                     console.error('Error during service call:', error);
@@ -520,7 +520,7 @@ class MassSearchCard extends HTMLElement {
 
     }
 
-    showPopup(response, title, t) {
+    showPopup(response, title, t, mediaType) {
         // Maak een popup-container
         const popupContainer = document.createElement('div');
         popupContainer.style.position = 'fixed';
@@ -704,14 +704,23 @@ class MassSearchCard extends HTMLElement {
                 button.appendChild(iconContainer);
             
                 // Handle button click for Track or Album
-                let selectedMediaType = '';
-                let selectedMediaPlayer = this.selectedMediaPlayer;
-            
                 button.addEventListener('click', async () => {
+                    const selectedMediaPlayer = this.selectedMediaPlayer;
+
+                    if (!selectedMediaPlayer) {
+                        alert(t.dropdown_label_media_player);
+                        return;
+                    }
+
+                    if (!mediaType) {
+                        alert(t.select_media_type);
+                        return;
+                    }
+
                     try {
                         await this.hass.callService('music_assistant', 'play_media', {
                             entity_id: selectedMediaPlayer,
-                            media_type: selectedMediaType,
+                            media_type: mediaType,
                             media_id: mediaItem.uri,
                         });
                         console.log(`${mediaItem.uri}`);
